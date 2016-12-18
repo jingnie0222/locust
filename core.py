@@ -97,9 +97,9 @@ class Locust(object):
     def __init__(self):
         super(Locust, self).__init__()
     
-    def run(self):
+    def run(self, client_id, num_clients):
         try:
-            self.task_set(self).run()
+            self.task_set(self).run(client_id, num_clients)
         except StopLocust:
             pass
         except (RescheduleTask, RescheduleTaskImmediately) as e:
@@ -248,7 +248,8 @@ class TaskSet(object):
         
         try:
             if hasattr(self, "on_start"):
-                self.on_start()
+                client_id, num_clients = args
+                self.on_start(client_id, num_clients)
         except InterruptTaskSet as e:
             if e.reschedule:
                 raise RescheduleTaskImmediately, e, sys.exc_info()[2]
