@@ -217,6 +217,12 @@ class StatsEntry(object):
         reqs = [self.num_reqs_per_sec.get(t, 0) for t in range(slice_start_time, self.stats.last_request_timestamp-2)]
         return avg(reqs)
 
+    def history_rps(self, t):
+        slice_start_time = max(t - 12, int(self.stats.start_time or 0))
+
+        reqs = [self.num_reqs_per_sec.get(t, 0) for t in range(slice_start_time, t-2)]
+        return avg(reqs)
+
     @property
     def total_rps(self):
         if not self.stats.last_request_timestamp or not self.stats.start_time:

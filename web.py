@@ -11,6 +11,12 @@ from StringIO import StringIO
 from gevent import wsgi
 from flask import Flask, make_response, request, render_template
 
+import io
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import datetime
+
 from . import runners
 from .cache import memoize
 from .runners import MasterLocustRunner
@@ -173,6 +179,46 @@ def request_stats():
     report["state"] = runners.locust_runner.state
     report["user_count"] = runners.locust_runner.user_count
     return json.dumps(report)
+
+@app.route("/stats/requests/png")
+def request_stats_png():
+    plt.figure(1)
+    total_sub_fig = len(runners.locust_runner.request_stats)
+    cur_sub_fig = 1
+    for s in chain(_sort_stats(runners.locust_runner.request_stats)):
+        t_list = []
+        rps_list = []
+
+        total_num = len(s.num_reqs_per_sec)
+        step = max(total_num/20, 1)
+        count = 0
+        for t in s.num_reqs_per_sec:
+            if count % step == 0 and t > 0:
+                t_list.append(datetime.datetime.fromtimestamp(t))
+                rps_list.append(s.history_rps(t))
+
+            count += 1
+
+        plt.subplot(total_sub_fig,1, cur_sub_fig)
+        plt.title("%s %s" % (s.method, s.name))
+        plt.xlabel('Time')
+        plt.ylabel('QPS: Query/Second')
+        plt.grid(True)
+        plt.plot(t_list, rps_list)
+        plt.gcf().autofmt_xdate()
+        cur_sub_fig += 1
+
+    imbuf = io.BytesIO()
+    plt.savefig(imbuf, format='png')
+    imbuf.seek(0)
+    response = make_response(imbuf.read())
+    imbuf.close()
+
+    file_name = "requests_{0}.png".format(time())
+    disposition = "attachment;filename={0}".format(file_name)
+    response.headers["Content-type"] = "image/png"
+    response.headers["Content-disposition"] = disposition
+    return response
 
 @app.route("/exceptions")
 def exceptions():
