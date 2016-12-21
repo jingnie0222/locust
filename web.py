@@ -239,7 +239,7 @@ def request_stats_png():
         total_num = len(s.num_reqs_per_sec)
         step = max(total_num/20, 1)
         count = 0
-        for t in s.num_reqs_per_sec:
+        for t in sorted(s.num_reqs_per_sec):
             if count % step == 0 and t > 0:
                 t_list.append(datetime.datetime.fromtimestamp(t))
                 rps_list.append(s.history_rps(t))

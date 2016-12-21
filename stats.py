@@ -221,7 +221,7 @@ class StatsEntry(object):
         slice_start_time = max(t - 12, int(self.stats.start_time or 0))
 
         reqs = [self.num_reqs_per_sec.get(t, 0) for t in range(slice_start_time, t-2)]
-        return avg(reqs)
+        return round(avg(reqs), 3)
 
     @property
     def total_rps(self):
