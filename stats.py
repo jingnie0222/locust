@@ -343,6 +343,18 @@ class StatsEntry(object):
             if((self.num_requests - processed_count) <= num_of_request):
                 return response_time
 
+    def get_percentile_between_response_time(self, min_time, max_time):
+        """
+        Get a certain number of percent of the requests finished btween
+        min_time and max_time.
+        """
+        processed_count = 0
+        for response_time in sorted(self.response_times.iterkeys(), reverse=True):
+            if response_time >= min_time and response_time < max_time:
+                processed_count += self.response_times[response_time]
+
+        return float(processed_count) / float(self.num_requests)
+
     def percentile(self, tpl=" %-" + str(STATS_NAME_WIDTH) + "s %8d %6d %6d %6d %6d %6d %6d %6d %6d %6d"):
         if not self.num_requests:
             raise ValueError("Can't calculate percentile on url with no successful requests")

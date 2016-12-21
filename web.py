@@ -16,6 +16,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import datetime
+import numpy as np
 
 from . import runners
 from .cache import memoize
@@ -27,6 +28,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 DEFAULT_CACHE_TIME = 2.0
+
+global_time_distribution = [(0, 0)]
+def set_time_distribution(time_distribution):
+    global global_time_distribution
+    global_time_distribution = time_distribution
 
 app = Flask(__name__)
 app.debug = True
@@ -137,6 +143,47 @@ def distribution_stats_csv():
     response.headers["Content-type"] = "text/csv"
     response.headers["Content-disposition"] = disposition
     return response
+
+@app.route("/stats/distribution/png")
+def distribution_stats_png():
+    plt.figure(2)
+
+    total_sub_fig = len(runners.locust_runner.request_stats)
+    cur_sub_fig = 1
+
+    for s in chain(_sort_stats(runners.locust_runner.request_stats)):
+        if s.num_requests:
+            time_distribution = global_time_distribution
+
+            percent_list = []
+            for min_time, max_time in time_distribution:
+                percent = round(s.get_percentile_between_response_time(min_time, max_time), 3) * 100
+                percent_list.append(percent)
+
+            plt.subplot(total_sub_fig,1, cur_sub_fig)
+            plt.title("%s %s" % (s.method, s.name))
+            plt.grid(True)
+            plt.ylabel('Request Distribution(%)')
+            x = np.arange(len(time_distribution))
+            plt.bar(x, height=percent_list)
+            plt.xticks(x+.5, time_distribution);
+
+            cur_sub_fig += 1
+
+    plt.xlabel('Time Interval (ms)')
+
+    imbuf = io.BytesIO()
+    plt.savefig(imbuf, format='png')
+    imbuf.seek(0)
+    response = make_response(imbuf.read())
+    imbuf.close()
+
+    file_name = "requests_{0}.png".format(time())
+    disposition = "attachment;filename={0}".format(file_name)
+    response.headers["Content-type"] = "image/png"
+    response.headers["Content-disposition"] = disposition
+    return response
+
 
 @app.route('/stats/requests')
 @memoize(timeout=DEFAULT_CACHE_TIME, dynamic_timeout=True)
