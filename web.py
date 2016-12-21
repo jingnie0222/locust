@@ -174,6 +174,7 @@ def distribution_stats_png():
 
     imbuf = io.BytesIO()
     plt.savefig(imbuf, format='png')
+    plt.close()
     imbuf.seek(0)
     response = make_response(imbuf.read())
     imbuf.close()
@@ -257,6 +258,7 @@ def request_stats_png():
 
     imbuf = io.BytesIO()
     plt.savefig(imbuf, format='png')
+    plt.close()
     imbuf.seek(0)
     response = make_response(imbuf.read())
     imbuf.close()
