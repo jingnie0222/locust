@@ -36,7 +36,12 @@ def _parsexml_get(request, response_content):
         return xml
 
     url_dict = convert_url_to_dict(request)
-    query_word = unquote(url_dict["query"]).decode("utf8").encode("gbk")
+    try:
+        query_word = unquote(url_dict["query"]).decode("utf8").encode("gbk")
+    except Exception as e:
+        print("unquote query: %s failed, %s" % (url_dict["query"], str(e)))
+        return False
+
     if 'callback' not in url_dict:
         return None
 
@@ -65,8 +70,12 @@ def _parsexml_get(request, response_content):
         elements = root.findall('.//*[@%s]' % key)
         for e in elements:
             url =  e.get(key)
-            #print("%s=%s" % (key, url))
-            f.write("%s=%s\n" % (key, url))
+            if url:
+                #print("%s=untest" % (url))
+                f.write("%s=untest\n" % (url))
+            else:
+                #print("invalid=%s" % (key))
+                f.write("invalid=%s\n" % (key))
 
     elements = root.findall('.//imgsrc')
     for imgsrc in elements:
@@ -78,8 +87,11 @@ def _parsexml_get(request, response_content):
     return ''
 def _parsexml_post(request, response_content):
     url_dict = convert_url_to_dict(request)
-    query_word = unquote(url_dict["queryString"]).decode("utf16").encode("gbk")
-    #print("query_word: %s" % query_word)
+    try:
+        query_word = unquote(url_dict["queryString"]).decode("utf16").encode("gbk")
+    except Exception as e:
+        print("unquote queryString: %s failed, %s" % (url_dict["queryString"], str(e)))
+        return False
 
     f = open("post.result", "a")
     f.write("[%s]\n" % query_word)
@@ -100,8 +112,12 @@ def _parsexml_post(request, response_content):
         elements = root.findall('.//*[@%s]' % key)
         for e in elements:
             url =  e.get(key)
-            #print("%s=%s" % (key, url))
-            f.write("%s=%s\n" % (key, url))
+            if url:
+                #print("%s=untest" % (url))
+                f.write("%s=untest\n" % (url))
+            else:
+                #print("invalid=%s" % (key))
+                f.write("invalid=%s\n" % (key))
 
     elements = root.findall('.//imgsrc')
     for imgsrc in elements:
