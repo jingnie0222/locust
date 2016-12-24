@@ -65,23 +65,25 @@ def _parsexml_get(request, response_content):
     f.close()
 
     f = open("get.url", "a")
-    f.write("[%s]\n" % query_word)
+    f.write("%s:\n" % query_word)
     for key in ["picaddress", "wapurl"]:
         elements = root.findall('.//*[@%s]' % key)
         for e in elements:
-            url =  e.get(key)
-            if url:
-                #print("%s=untest" % (url))
-                f.write("%s=untest\n" % (url))
-            else:
-                #print("invalid=%s" % (key))
-                f.write("invalid=%s\n" % (key))
+            url =  e.get(key) or "not exist"
+            #print("%s=%s" % (key, url))
+            f.write("- url: %s\n" % url)
+            f.write("  status: untest\n")
+            f.write("  flag: %s\n" % key)
 
     elements = root.findall('.//imgsrc')
     for imgsrc in elements:
-        url = imgsrc.text
+        url = imgsrc.text or "not exist"
         #print("imgsrc=%s" % url)
-        f.write("imgsrc=%s\n" % url)
+        f.write("- url: %s\n" % url)
+        f.write("  status: untest\n")
+        f.write("  flag: imgsrc\n")
+
+    f.close()
 
     #print("%s" % (xml_content.encode("gbk")))
     return ''
@@ -107,23 +109,23 @@ def _parsexml_post(request, response_content):
     f.close()
 
     f = open("post.url", "a")
-    f.write("[%s]\n" % query_word)
+    f.write("%s:\n" % query_word)
     for key in ["picaddress", "wapurl"]:
         elements = root.findall('.//*[@%s]' % key)
         for e in elements:
-            url =  e.get(key)
-            if url:
-                #print("%s=untest" % (url))
-                f.write("%s=untest\n" % (url))
-            else:
-                #print("invalid=%s" % (key))
-                f.write("invalid=%s\n" % (key))
+            url =  e.get(key) or "not exist"
+            #print("%s=%s" % (key, url))
+            f.write("- url: %s\n" % url)
+            f.write("  status: untest\n")
+            f.write("  flag: %s\n" % key)
 
     elements = root.findall('.//imgsrc')
     for imgsrc in elements:
-        url = imgsrc.text
+        url = imgsrc.text or "not exist"
         #print("imgsrc=%s" % url)
-        f.write("imgsrc=%s\n" % url)
+        f.write("- url: %s\n" % url)
+        f.write("  status: untest\n")
+        f.write("  flag: imgsrc\n")
 
     f.close()
     #print("%s" % (response_content.encode("gbk")))
