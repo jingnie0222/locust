@@ -238,7 +238,7 @@ def request_stats_png():
         rps_list = []
 
         total_num = len(s.num_reqs_per_sec)
-        step = max(total_num/20, 1)
+        step = max(total_num/200, 1)
         count = 0
         for t in sorted(s.num_reqs_per_sec):
             if count % step == 0 and t > 0:

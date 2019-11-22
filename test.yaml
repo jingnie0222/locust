@@ -1,0 +1,10 @@
+children:
+ - url: http://www.163.com
+   status: ok
+ - url: http://www.sohu.com
+   status: fail
+word:
+ - url: http://www.163.com
+   status: ok
+ - url: http://www.sohu.com
+   status: fail
